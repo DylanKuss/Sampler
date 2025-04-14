@@ -18,6 +18,15 @@
       <input type="text" id="searchBar" class="form-control mb-2" placeholder="Search products...">
       <button class="btn btn-primary mb-4" onclick="searchProducts()">Search</button>
 
+      <button id="orderHistoryBtn" class="btn btn-info">View Order History</button>
+<div id="orderHistoryModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Order History</h2>
+    <div id="orderHistoryContent"></div>
+  </div>
+</div> 
+      
       <h3>Add or Update Product</h3>
       <form id="productForm">
          <input type="hidden" id="productIndex">
