@@ -590,6 +590,19 @@ function proceedToPayment() {
   modalContent.innerHTML = html;
 }
 
+   // Add this to your DOMContentLoaded event listener
+document.querySelector(".close").addEventListener("click", function() {
+  document.getElementById("orderHistoryModal").style.display = "none";
+});
+
+// Close when clicking outside modal
+window.addEventListener("click", function(event) {
+  const modal = document.getElementById("orderHistoryModal");
+  if (event.target === modal) {
+    modal.style.display = "none";
+  }
+});
+
    
   // --- Expose the verifiers to the Global Scope ---
   window.JSVerifiers = {
