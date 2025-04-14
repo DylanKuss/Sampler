@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
    const form = document.querySelector("form");
-
+s
    form.addEventListener("submit", (event) => {
       event.preventDefault();
 
@@ -517,85 +517,74 @@ function proceedToPayment() {
   };
 })();
 
-document.addEventListener('DOMContentLoaded', function() {
-  // Get elements
-  const orderHistoryBtn = document.getElementById('orderHistoryBtn');
-  const modal = document.getElementById('orderHistoryModal');
-  const closeBtn = document.querySelector('.close');
-  const orderHistoryContent = document.getElementById('orderHistoryContent');
-  
-  // Open modal when button is clicked
-  orderHistoryBtn.addEventListener('click', function() {
-    displayOrderHistory();
-    modal.style.display = 'block';
-  });
-  
-  // Close modal when X is clicked
-  closeBtn.addEventListener('click', function() {
-    modal.style.display = 'none';
-  });
-  
-  // Close modal when clicking outside
-  window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-      modal.style.display = 'none';
-    }
-  });
-  
-  // Function to display order history
-  function displayOrderHistory() {
-    // Retrieve orders from localStorage
-    const orders = JSON.parse(localStorage.getItem('orders')) || [];
-    
-    if (orders.length === 0) {
-      orderHistoryContent.innerHTML = '<p>No order history found.</p>';
-      return;
-    }
-    
-    // Create HTML for orders
-    let html = '<div class="order-history-container">';
-    
-    orders.forEach((order, index) => {
-      html += `
-        <div class="order-item">
-          <h3>Order #${index + 1}</h3>
-          <p><strong>Date:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
-          <table>
-            <thead>
+function showOrderHistory() {
+  const container = document.getElementById("orderHistoryContent") || document.getElementById("orderHistory");
+  if (!container) return;
+
+  const orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+  if (orders.length === 0) {
+    container.innerHTML = "<p>No orders yet.</p>";
+    return;
+  }
+
+  container.innerHTML = orders.map((order, i) => `
+    <div class="order-card mb-3 p-3 border rounded bg-light">
+      <h5>Order #${i + 1} - ${order.confirmationNumber}</h5>
+      <p><strong>Date:</strong> ${order.date}</p>
+      <p><strong>Name:</strong> ${order.user.name}</p>
+      <p><strong>Email:</strong> ${order.user.email}</p>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${order.cartItems.map(item => `
               <tr>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Price</th>
+                <td>${item.name}</td>
+                <td>$${item.price.toFixed(2)}</td>
+                <td>${item.quantity}</td>
+                <td>$${(item.price * item.quantity).toFixed(2)}</td>
               </tr>
-            </thead>
-            <tbody>
-      `;
-      
-      order.items.forEach(item => {
-        html += `
-          <tr>
-            <td>${item.name}</td>
-            <td>${item.quantity}</td>
-            <td>$${item.price.toFixed(2)}</td>
-          </tr>
-        `;
-      });
-      
-      html += `
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="2"><strong>Total:</strong></td>
-                <td><strong>$${order.total.toFixed(2)}</strong></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-        <hr>
-      `;
+            `).join('')}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="text-end"><strong>Total:</strong></td>
+              <td><strong>$${order.totalPrice.toFixed(2)}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+    <hr>
+  `).join('');
+}
+
+// Add this event listener for the button
+document.addEventListener("DOMContentLoaded", function() {
+  updateCart();
+  showOrderHistory();
+  
+  // Initialize the order history button if it exists
+  const orderHistoryBtn = document.getElementById("orderHistoryBtn");
+  if (orderHistoryBtn) {
+    orderHistoryBtn.addEventListener("click", function() {
+      showOrderHistory();
+      // If using Bootstrap
+      if (typeof bootstrap !== 'undefined') {
+        const modal = new bootstrap.Modal(document.getElementById('orderHistoryModal'));
+        modal.show();
+      } else {
+        // Fallback for non-Bootstrap
+        document.getElementById('orderHistoryModal').style.display = 'block';
+      }
     });
-    
-    html += '</div>';
-    orderHistoryContent.innerHTML = html;
   }
 });
