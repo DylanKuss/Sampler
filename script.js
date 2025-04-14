@@ -516,3 +516,86 @@ function proceedToPayment() {
     verifyReturnRequest: verifyReturnRequest
   };
 })();
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Get elements
+  const orderHistoryBtn = document.getElementById('orderHistoryBtn');
+  const modal = document.getElementById('orderHistoryModal');
+  const closeBtn = document.querySelector('.close');
+  const orderHistoryContent = document.getElementById('orderHistoryContent');
+  
+  // Open modal when button is clicked
+  orderHistoryBtn.addEventListener('click', function() {
+    displayOrderHistory();
+    modal.style.display = 'block';
+  });
+  
+  // Close modal when X is clicked
+  closeBtn.addEventListener('click', function() {
+    modal.style.display = 'none';
+  });
+  
+  // Close modal when clicking outside
+  window.addEventListener('click', function(event) {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
+  
+  // Function to display order history
+  function displayOrderHistory() {
+    // Retrieve orders from localStorage
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    
+    if (orders.length === 0) {
+      orderHistoryContent.innerHTML = '<p>No order history found.</p>';
+      return;
+    }
+    
+    // Create HTML for orders
+    let html = '<div class="order-history-container">';
+    
+    orders.forEach((order, index) => {
+      html += `
+        <div class="order-item">
+          <h3>Order #${index + 1}</h3>
+          <p><strong>Date:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      order.items.forEach(item => {
+        html += `
+          <tr>
+            <td>${item.name}</td>
+            <td>${item.quantity}</td>
+            <td>$${item.price.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+      
+      html += `
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2"><strong>Total:</strong></td>
+                <td><strong>$${order.total.toFixed(2)}</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <hr>
+      `;
+    });
+    
+    html += '</div>';
+    orderHistoryContent.innerHTML = html;
+  }
+});
