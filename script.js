@@ -502,7 +502,95 @@ function proceedToPayment() {
 
     return true;
   }
+   //new entry
+    const orderHistoryBtn = document.getElementById("orderHistoryBtn");
+  if (orderHistoryBtn) {
+    orderHistoryBtn.addEventListener("click", function() {
+      showOrderHistory();
+      // Show the modal
+      const modal = document.getElementById("orderHistoryModal");
+      modal.style.display = "block";
+    });
+  }
+   function showOrderHistory() {
+  const orders = JSON.parse(localStorage.getItem("orders")) || [];
+  const modalContent = document.getElementById("orderHistoryContent");
+  
+  if (!modalContent) {
+    console.error("Modal content element not found!");
+    return;
+  }
 
+  if (orders.length === 0) {
+    modalContent.innerHTML = '<p class="no-orders">No orders found.</p>';
+    return;
+  }
+
+  let html = '<div class="order-history-form">';
+  
+  orders.forEach((order, index) => {
+    html += `
+      <div class="order-form">
+        <h3>Order #${index + 1}</h3>
+        <div class="form-group">
+          <label>Confirmation Number:</label>
+          <input type="text" value="${order.confirmationNumber}" readonly>
+        </div>
+        <div class="form-group">
+          <label>Date:</label>
+          <input type="text" value="${order.date}" readonly>
+        </div>
+        <div class="form-group">
+          <label>Customer Name:</label>
+          <input type="text" value="${order.user.name}" readonly>
+        </div>
+        <div class="form-group">
+          <label>Email:</label>
+          <input type="text" value="${order.user.email}" readonly>
+        </div>
+        <h4>Order Items</h4>
+        <table class="order-items">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+    
+    order.cartItems.forEach(item => {
+      html += `
+        <tr>
+          <td>${item.name}</td>
+          <td>$${item.price.toFixed(2)}</td>
+          <td>${item.quantity}</td>
+          <td>$${(item.price * item.quantity).toFixed(2)}</td>
+        </tr>
+      `;
+    });
+    
+    html += `
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="total-label">Order Total:</td>
+              <td class="total-value">$${order.totalPrice.toFixed(2)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <hr class="order-divider">
+    `;
+  });
+  
+  html += '</div>';
+  modalContent.innerHTML = html;
+}
+
+   
   // --- Expose the verifiers to the Global Scope ---
   window.JSVerifiers = {
     // Utility functions
@@ -516,75 +604,3 @@ function proceedToPayment() {
     verifyReturnRequest: verifyReturnRequest
   };
 })();
-
-function showOrderHistory() {
-  const container = document.getElementById("orderHistoryContent") || document.getElementById("orderHistory");
-  if (!container) return;
-
-  const orders = JSON.parse(localStorage.getItem("orders")) || [];
-
-  if (orders.length === 0) {
-    container.innerHTML = "<p>No orders yet.</p>";
-    return;
-  }
-
-  container.innerHTML = orders.map((order, i) => `
-    <div class="order-card mb-3 p-3 border rounded bg-light">
-      <h5>Order #${i + 1} - ${order.confirmationNumber}</h5>
-      <p><strong>Date:</strong> ${order.date}</p>
-      <p><strong>Name:</strong> ${order.user.name}</p>
-      <p><strong>Email:</strong> ${order.user.email}</p>
-      <div class="table-responsive">
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Price</th>
-              <th>Quantity</th>
-              <th>Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${order.cartItems.map(item => `
-              <tr>
-                <td>${item.name}</td>
-                <td>$${item.price.toFixed(2)}</td>
-                <td>${item.quantity}</td>
-                <td>$${(item.price * item.quantity).toFixed(2)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="3" class="text-end"><strong>Total:</strong></td>
-              <td><strong>$${order.totalPrice.toFixed(2)}</strong></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </div>
-    <hr>
-  `).join('');
-}
-
-// Add this event listener for the button
-document.addEventListener("DOMContentLoaded", function() {
-  updateCart();
-  showOrderHistory();
-  
-  // Initialize the order history button if it exists
-  const orderHistoryBtn = document.getElementById("orderHistoryBtn");
-  if (orderHistoryBtn) {
-    orderHistoryBtn.addEventListener("click", function() {
-      showOrderHistory();
-      // If using Bootstrap
-      if (typeof bootstrap !== 'undefined') {
-        const modal = new bootstrap.Modal(document.getElementById('orderHistoryModal'));
-        modal.show();
-      } else {
-        // Fallback for non-Bootstrap
-        document.getElementById('orderHistoryModal').style.display = 'block';
-      }
-    });
-  }
-});
